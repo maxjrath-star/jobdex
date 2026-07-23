@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobDex — High-Growth Tech Job Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+--bg:#10141f; --panel:#1a2030; --panel2:#141926; --border:#3b4cca;
+--text:#e8ecf3; --muted:#9aa5bd; --accent:#f8d030; --hp:#30d030;
+--gtm:#e3350d; --eng:#3b9cff; --other:#9aa5bd; --danger:#e3350d;
+--px:#0a0c12;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"VT323",monospace;font-size:19px;line-height:1.4;position:relative}
+/* scanlines */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:99;
+background:repeating-linear-gradient(0deg,rgba(0,0,0,.13) 0 1px,transparent 1px 3px);}
+a{color:inherit;text-decoration:none}
+img.spr{image-rendering:pixelated;vertical-align:middle}
+.px{font-family:"Press Start 2P",monospace}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px}
+.panel{background:var(--panel);border:3px solid var(--px);box-shadow:0 0 0 3px var(--border), 6px 6px 0 0 var(--px)}
+/* header */
+header{border-bottom:3px solid var(--border);background:linear-gradient(180deg,#151b2c,#10141f);padding:26px 0 18px;position:relative}
+.trainerbox{position:absolute;top:22px;right:24px;z-index:5}
+.trainerbtn{font-family:"Press Start 2P",monospace;font-size:9px;padding:11px 15px;background:var(--gtm);color:#fff;border:3px solid var(--px);box-shadow:0 0 0 2px var(--border);cursor:pointer}
+.trainerbtn:hover{box-shadow:0 0 0 2px var(--accent)}
+.trainerchip{display:flex;align-items:center;gap:8px;background:var(--panel2);border:2px solid var(--border);padding:6px 12px;cursor:pointer;font-size:18px;color:var(--accent)}
+.trainerchip img{width:34px;height:34px;image-rendering:pixelated}
+.trainerchip:hover{border-color:var(--accent)}
+@media(max-width:820px){
+.trainerbox{position:static;margin:12px 0 2px;display:inline-block}
+.logo{font-size:19px}
+header{padding-top:18px}
+}
+.logo{font-family:"Press Start 2P",monospace;font-size:24px;letter-spacing:0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo span{color:var(--accent)}
+.tagline{color:var(--muted);margin-top:10px;font-size:19px}
+.spriterow{display:flex;gap:2px;margin-top:10px;flex-wrap:wrap;align-items:flex-end}
+.spriterow img{width:56px;height:56px;image-rendering:pixelated;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.5));animation:bob 1.6s ease-in-out infinite}
+.spriterow img:nth-child(2n){animation-delay:.4s}
+.spriterow img:nth-child(3n){animation-delay:.8s}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.statbar{display:flex;gap:26px;margin-top:12px;flex-wrap:wrap}
+.stat{font-size:17px;color:var(--muted)}
+.stat b{color:var(--accent);font-family:"Press Start 2P",monospace;font-size:13px;margin-right:6px}
+/* HP-bar loader */
+.hpwrap{margin-top:14px;display:flex;align-items:center;gap:10px}
+.hplabel{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--accent)}
+.progress{flex:1;max-width:420px;height:12px;background:#0a0c12;border:2px solid #fff;outline:2px solid #0a0c12;overflow:hidden}
+.progress>div{height:100%;width:0;background:var(--hp);transition:width .3s}
+/* view switcher */
+.views{display:flex;gap:10px;margin-top:16px}
+.viewbtn{font-family:"Press Start 2P",monospace;font-size:11px;padding:11px 18px;border:3px solid var(--px);box-shadow:0 0 0 2px var(--border);background:var(--panel2);color:var(--muted);cursor:pointer}
+.viewbtn.on{background:var(--accent);color:#111;box-shadow:0 0 0 2px #fff}
+/* controls */
+.controls{position:sticky;top:0;z-index:10;background:rgba(16,20,31,.96);border-bottom:3px solid var(--border);padding:14px 0}
+.tabs{display:flex;gap:10px;flex-wrap:wrap}
+.tab{font-family:"Press Start 2P",monospace;font-size:10px;display:flex;align-items:center;gap:8px;
+padding:9px 14px;border:3px solid var(--px);box-shadow:0 0 0 2px var(--border);
+background:var(--panel2);color:var(--muted);cursor:pointer}
+.tab img{width:30px;height:30px;image-rendering:pixelated}
+.tab.on{background:var(--accent);color:#111;box-shadow:0 0 0 2px #fff}
+.tab.on.gtm{background:var(--gtm);color:#fff}
+.tab.on.eng{background:var(--eng);color:#fff}
+.row2{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{padding:4px 12px;border:2px solid var(--border);background:var(--panel2);color:var(--muted);cursor:pointer;font-size:17px;font-family:"VT323",monospace}
+.chip.on{border-color:var(--accent);color:var(--accent);background:rgba(248,208,48,.1)}
+.chip.star.on{border-color:var(--accent);color:var(--accent)}
+input[type=text],select{background:var(--panel2);border:2px solid var(--border);color:var(--text);padding:7px 12px;font-size:18px;font-family:"VT323",monospace;outline:none}
+input[type=text]:focus,select:focus{border-color:var(--accent)}
+input[type=text]{flex:1;min-width:180px}
+label.check{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:17px;cursor:pointer;white-space:nowrap}
+/* multi-select dropdowns */
+.msel{position:relative}
+.msel>button{background:var(--panel2);border:2px solid var(--border);color:var(--text);padding:7px 12px;font-size:18px;font-family:"VT323",monospace;cursor:pointer}
+.msel>button:hover{border-color:var(--accent)}
+.msel .panel{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:30;background:var(--panel);border:3px solid var(--px);box-shadow:0 0 0 2px var(--border),6px 6px 0 0 var(--px);min-width:250px;max-height:320px;overflow:auto;padding:6px}
+.msel.open .panel{display:block}
+.msel .opt{display:flex;gap:9px;align-items:center;padding:5px 8px;cursor:pointer;color:var(--muted);font-size:18px;white-space:nowrap}
+.msel .opt:hover{background:var(--panel2)}
+.msel .opt.on{color:var(--accent)}
+.msel .bx{font-size:16px;flex:none}
+/* layout */
+main{display:grid;grid-template-columns:260px 1fr;gap:26px;padding:24px 0 60px}
+@media(max-width:900px){main{grid-template-columns:1fr}.side{order:2}}
+/* sidebar */
+.side h2{font-family:"Press Start 2P",monospace;font-size:11px;color:#fff;margin:26px 0 8px;border-bottom:2px solid var(--border);padding-bottom:6px;display:flex;align-items:center;gap:8px}
+.side h2 img{width:30px;height:30px;image-rendering:pixelated}
+.side h2:first-child{margin-top:0}
+.side h3{font-family:"Press Start 2P",monospace;font-size:9px;color:var(--accent);margin:14px 0 8px;display:flex;align-items:center;gap:8px;text-transform:uppercase;border-bottom:2px solid rgba(59,76,202,.35);padding-bottom:5px}
+.side h3 img{width:36px;height:36px;image-rendering:pixelated}
+.co{display:flex;align-items:center;gap:8px;padding:3px 8px;cursor:pointer;font-size:18px;color:var(--muted)}
+.co:hover{background:var(--panel2)}
+.co.on{background:rgba(248,208,48,.12);color:var(--accent)}
+.co .dot{width:8px;height:8px;background:var(--border);flex:none}
+.co .dot.ok{background:var(--hp)}
+.co .dot.err{background:var(--danger)}
+.co .n{margin-left:auto;font-size:15px;color:var(--muted)}
+/* jobs */
+.meta-line{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;color:var(--muted)}
+.meta-line .px{font-size:10px;color:var(--accent)}
+.card{display:block;background:var(--panel);border:3px solid var(--px);box-shadow:0 0 0 2px var(--border);padding:14px 18px;margin-bottom:14px;transition:transform .08s}
+.card:hover{box-shadow:0 0 0 2px var(--accent);transform:translate(-1px,-1px)}
+.card .top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.card .title{font-weight:700;font-size:22px}
+.card .co-name{color:var(--accent);font-size:18px;margin-top:1px;display:flex;align-items:center;gap:7px}
+.card .co-name img{width:34px;height:34px;image-rendering:pixelated}
+.badge{font-family:"Press Start 2P",monospace;font-size:8px;padding:5px 8px;border:2px solid var(--px);white-space:nowrap;flex:none}
+.badge.gtm{background:var(--gtm);color:#fff}
+.badge.eng{background:var(--eng);color:#fff}
+.badge.other{background:#2a3347;color:var(--muted)}
+.card .bottom{display:flex;gap:16px;margin-top:6px;color:var(--muted);font-size:17px;flex-wrap:wrap}
+.card .new{color:var(--hp)}
+.empty{text-align:center;color:var(--muted);padding:50px 0;font-size:20px}
+.empty img{width:96px;height:96px;image-rendering:pixelated;display:block;margin:0 auto 10px}
+.btn-more{font-family:"Press Start 2P",monospace;font-size:10px;display:block;margin:20px auto;padding:12px 26px;border:3px solid var(--px);box-shadow:0 0 0 2px var(--border);background:var(--panel2);color:var(--text);cursor:pointer}
+.btn-more:hover{box-shadow:0 0 0 2px var(--accent);color:var(--accent)}
+/* catch button + modal */
+.pball{background:none;border:2px solid var(--border);color:var(--muted);font-size:19px;cursor:pointer;padding:2px 9px;flex:none;line-height:1.2}
+.pball:hover{border-color:var(--accent);color:var(--accent)}
+.pball.on{color:var(--accent);border-color:var(--accent);background:rgba(248,208,48,.12)}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:100;display:none;align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.mbox{background:var(--panel);border:3px solid var(--px);box-shadow:0 0 0 3px var(--border),8px 8px 0 0 var(--px);padding:24px;max-width:470px;width:92%;max-height:88vh;overflow:auto}
+.mbox h2{font-family:"Press Start 2P",monospace;font-size:14px;color:var(--accent);margin-bottom:14px}
+.mbox label{display:block;color:var(--muted);font-size:16px;margin:10px 0 3px;text-transform:uppercase;letter-spacing:.06em}
+.mbox input[type=text],.mbox input[type=email],.mbox input[type=number],.mbox select{width:100%;font-size:19px}
+.mbox .mrow{display:flex;gap:10px;margin-top:16px}
+.mbtn{font-family:"Press Start 2P",monospace;font-size:10px;padding:12px 16px;border:3px solid var(--px);box-shadow:0 0 0 2px var(--border);background:var(--accent);color:#111;cursor:pointer}
+.mbtn.alt{background:var(--panel2);color:var(--muted)}
+.mbtn:hover{box-shadow:0 0 0 2px #fff}
+.sprites{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.sprites img{width:46px;height:46px;border:2px solid var(--border);cursor:pointer;image-rendering:pixelated;padding:2px;background:var(--panel2)}
+.sprites img.on{border-color:var(--accent);background:rgba(248,208,48,.15)}
+.gbadges{display:flex;gap:10px;margin-top:6px}
+.gbadge{width:38px;height:38px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;opacity:.25;background:var(--panel2)}
+.gbadge.on{opacity:1;border-color:var(--accent)}
+.mnote{color:var(--muted);font-size:16px;margin-top:10px}
+.mok{color:var(--hp);font-size:18px;margin-top:10px}
+/* hiring index */
+#indexView{display:none;padding:24px 0 60px}
+#indexView.on{display:block}
+.ix-head{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+.ix-head h2{font-family:"Press Start 2P",monospace;font-size:16px;color:var(--accent)}
+.ix-note{color:var(--muted);font-size:18px;margin-bottom:16px}
+.ix-controls{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0 18px}
+.ix-panel{background:var(--panel);border:3px solid var(--px);box-shadow:0 0 0 2px var(--border);padding:18px;margin-bottom:22px}
+.ix-panel h4{font-family:"Press Start 2P",monospace;font-size:10px;color:var(--accent);margin-bottom:12px}
+.ix-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin-bottom:22px}
+.ix-stat{background:var(--panel);border:3px solid var(--px);box-shadow:0 0 0 2px var(--border);padding:14px}
+.ix-stat .k{color:var(--muted);font-size:16px;text-transform:uppercase}
+.ix-stat .v{font-family:"Press Start 2P",monospace;font-size:18px;color:var(--accent);margin-top:6px}
+.ix-stat .d{font-size:16px;margin-top:4px}
+.ix-stat .d.up{color:var(--hp)} .ix-stat .d.down{color:var(--danger)}
+.chartbox{position:relative;height:340px}
+/* subscribe */
+.subbar{background:var(--panel);border-top:3px solid var(--border);border-bottom:3px solid var(--border);padding:16px 0}
+.subinner{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.subinner img{width:44px;height:44px;image-rendering:pixelated}
+.subtitle{font-family:"Press Start 2P",monospace;font-size:17px;color:var(--accent)}
+.subdesc{color:var(--muted);font-size:19px;margin-top:4px}
+.subform{display:flex;gap:10px;flex-wrap:wrap;margin-left:auto;align-items:center}
+.subok{color:var(--hp);font-size:18px}
+footer{border-top:3px solid var(--border);color:var(--muted);font-size:17px;padding:16px 0;text-align:center}
+footer .spriterow{justify-content:center;margin:0 0 8px}
+footer .spriterow img{width:40px;height:40px;animation:none}
+</style>
+</head>
+<body>
+
+<header>
+<div class="wrap">
+<div class="logo"><img class="spr" src="" data-poke="25" width="48" height="48" alt="Pikachu">Job<span>Dex</span></div>
+<div id="trainerBox" class="trainerbox"></div>
+<div class="tagline">Live openings across high-growth tech — fintech &amp; the CFO stack, AI inference &amp; infra, dev tools, HR tech, AI agents, cybersecurity, frontier labs &amp; healthcare AI — pulled straight from company career feeds.</div>
+<div class="spriterow" id="heroSprites"></div>
+<div class="statbar">
+<div class="stat"><b id="stJobs">–</b> open roles</div>
+<div class="stat"><b id="stCos">–</b> companies live</div>
+<div class="stat"><b id="stGtm">–</b> GTM</div>
+<div class="stat"><b id="stEng">–</b> Engineering</div>
+</div>
+<div class="hpwrap"><span class="hplabel">FEEDS&nbsp;HP</span><div class="progress"><div id="pbar"></div></div><span class="stat" id="stStatus">loading…</span></div>
+<div class="views">
+<button class="viewbtn on" id="vBoard">🎮 JOB BOARD</button>
+<button class="viewbtn" id="vIndex">📊 HIRING INDEX</button>
+</div>
+</div>
+</header>
+
+<div class="subbar">
+<div class="wrap subinner">
+<img class="spr" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-ii/crystal/133.png" alt="">
+<div>
+<div class="subtitle">JOIN THE TRAINER CLUB</div>
+<div class="subdesc">One signup does it all: trainer profile, saved roles, resume — plus monthly hiring-index trends &amp; AI/tech news. No spam.</div>
+</div>
+<form name="subscribe" data-netlify="true" netlify-honeypot="bot-field" hidden>
+<input type="hidden" name="form-name" value="subscribe">
+<input type="email" name="email"><input type="text" name="interest"><input name="bot-field">
+</form>
+<div class="subform"><button type="button" id="joinBtn" class="mbtn">SIGN ME UP</button></div>
+</div>
+</div>
+
+<div class="controls" id="boardControls">
+<div class="wrap">
+<div class="tabs" id="tabs">
+<button class="tab on" data-p="ALL"><img class="spr" data-poke="25" alt="">ALL</button>
+<button class="tab" data-p="GTM"><img class="spr" data-poke="6" alt="">GTM</button>
+<button class="tab" data-p="ENG"><img class="spr" data-poke="9" alt="">ENGINEERING</button>
+<button class="tab" data-p="OTHER"><img class="spr" data-poke="143" alt="">OTHER</button>
+<button class="tab" id="partyTab">◓ PARTY</button>
+</div>
+<div class="row2"><div class="chips" id="subchips"></div></div>
+<div class="row2">
+<input type="text" id="q" placeholder="Search title, company, location… (e.g. account manager)">
+<div id="secMs"></div>
+<div id="catMs"></div>
+<div id="stageMs"></div>
+<div id="modeMs"></div>
+<label class="check"><input type="checkbox" id="usOnly"> US only</label>
+</div>
+</div>
+</div>
+
+<main class="wrap" id="boardView">
+<aside class="side" id="side"></aside>
+<section>
+<div class="meta-line">
+<span class="px" id="count">SEARCHING…</span>
+<select id="sortSel">
+<option value="new">Newest first</option>
+<option value="co">By company</option>
+<option value="title">By title</option>
+</select>
+</div>
+<div id="list"></div>
+<button class="btn-more" id="more" style="display:none">SHOW MORE ▼</button>
+</section>
+</main>
+
+<div class="wrap" id="indexView">
+<div class="ix-head"><h2>📊 HIRING INDEX</h2></div>
+<div class="ix-note">A monthly pulse on tech hiring: open roles are snapshotted from every company feed on the 1st of each month. Postings are a <b>leading indicator</b>, not hires — watch the month-over-month change, not the absolute count.</div>
+<div class="ix-controls" id="ixSecChips"></div>
+<div class="ix-grid" id="ixStats"></div>
+<div class="ix-panel"><h4>OPEN ROLES OVER TIME</h4><div class="chartbox"><canvas id="ixChart"></canvas></div></div>
+<div class="ix-panel"><h4>GTM vs ENGINEERING SHARE</h4><div class="chartbox"><canvas id="ixSplitChart"></canvas></div></div>
+<div class="ix-note" id="ixFoot"></div>
+</div>
+
+<footer>
+<div class="wrap">
+<div class="spriterow" id="footSprites"></div>
+Jobs load live from public Greenhouse / Lever / Ashby feeds each time you open the page.<br>
+Trainer accounts store only what you enter (profile, caught roles, resume) — email maxjrath@gmail.com to delete your data.<br>
+To add a company, edit the COMPANIES list inside this file. Gotta hire 'em all.
+</div>
+</footer>
+
+<div class="overlay" id="overlay"><div class="mbox" id="mbox"></div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ============================================================
+SPRITES — Gen II (Crystal) pixel art via PokeAPI's sprite CDN
+============================================================ */
+const SPR=id=>`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-ii/crystal/${id}.png`;
+const P={pikachu:25,charizard:6,blastoise:9,venusaur:3,gengar:94,heracross:214,dragonite:149,
+lapras:131,lugia:249,gyarados:130,snorlax:143,alakazam:65,meowth:52,scyther:123,jigglypuff:39,
+psyduck:54,dratini:147,eevee:133,squirtle:7,bulbasaur:1,charmander:4,mewtwo:150,
+zapdos:145,porygon:137,clefairy:35,haunter:93,arcanine:59,mew:151,chansey:113};
+// hero banner: the requested crew
+const HERO=[P.heracross,P.dragonite,P.gengar,P.lapras,P.blastoise,P.charizard,P.venusaur,P.lugia,P.gyarados,P.pikachu,P.snorlax,P.eevee];
+const FOOT=[P.bulbasaur,P.charmander,P.squirtle,P.dratini,P.jigglypuff,P.meowth];
+// one mascot per company category
+const CAT_SPR={fpa:P.alakazam,spend:P.meowth,billing:P.gengar,erp:P.lapras,close:P.heracross,
+apar:P.gyarados,proc:P.scyther,bank:P.dragonite,ai:P.mewtwo,invest:P.lugia,
+inference:P.zapdos,devtools:P.porygon,hrtech:P.clefairy,agents:P.haunter,
+cyber:P.arcanine,labs:P.mew,healthai:P.chansey};
+/* Funding stage per company (hand-tagged; the weekly scan flags changes).
+Seed | A | B | C | D+ (Series D or later/private giants) | Pub (public, PE-owned or acquired) */
+const STAGE_LBL={Seed:"Seed",A:"Series A",B:"Series B",C:"Series C","D+":"Series D+",Pub:"Public / PE / Acquired"};
+
+/* ============================================================
+SECTORS + CATEGORIES
+Sectors are the top-level verticals. Fintech keeps its
+subcategories; the other sectors are one category each.
+============================================================ */
+const SECTORS={fin:"Fintech / CFO Stack",inference:"AI Inference & Infra",devtools:"Dev Tools & AI Coding",
+hrtech:"HR Tech & Payroll",agents:"Vertical AI Agents",cyber:"Cybersecurity",
+labs:"Frontier AI Labs",healthai:"Healthcare AI"};
+const CATS={fpa:"FP&A / Planning",spend:"Expense & Spend",billing:"Billing & Monetization",
+erp:"ERP & Accounting",close:"Close & Automation",apar:"AP / AR & Payments",
+proc:"Procurement",bank:"Banking & Treasury",ai:"Accounting AI",
+invest:"Investment & Private Markets",
+inference:"AI Inference & Infra",devtools:"Dev Tools & AI Coding",hrtech:"HR Tech & Payroll",
+agents:"Vertical AI Agents",cyber:"Cybersecurity",labs:"Frontier AI Labs",healthai:"Healthcare AI"};
+const CAT_SEC={fpa:"fin",spend:"fin",billing:"fin",erp:"fin",close:"fin",apar:"fin",proc:"fin",
+bank:"fin",ai:"fin",invest:"fin",
+inference:"inference",devtools:"devtools",hrtech:"hrtech",agents:"agents",
+cyber:"cyber",labs:"labs",healthai:"healthai"};
+
+/* ============================================================
+COMPANY REGISTRY
+candidates = ATS feeds tried in order:
+["gh",slug] Greenhouse · ["lever",slug] · ["ashby",slug]
+The app auto-detects which one works. To add a company, copy a
+line and grab the slug from its careers URL
+(job-boards.greenhouse.io/SLUG, jobs.lever.co/SLUG, jobs.ashbyhq.com/SLUG).
+============================================================ */
+const COMPANIES=[
+/* ---- FINTECH / CFO STACK ---- */
+{name:"Drivetrain",cat:"fpa",st:"B",candidates:[["lever","drivetrain"],["ashby","drivetrain"]]},
+{name:"Cube",cat:"fpa",st:"B",candidates:[["gh","cube"],["gh","cubesoftware"],["ashby","cube"],["lever","cube"]]},
+{name:"Pigment",cat:"fpa",st:"D+",candidates:[["lever","pigment"],["gh","pigment"],["ashby","pigment"]]},
+{name:"Abacum",cat:"fpa",st:"B",candidates:[["lever","abacum"],["ashby","abacum"],["gh","abacum"]]},
+{name:"Vareto",cat:"fpa",st:"A",candidates:[["ashby","vareto"],["lever","vareto"],["gh","vareto"]]},
+{name:"Runway (FP&A)",cat:"fpa",st:"A",candidates:[["ashby","runway"],["lever","runway"]]},
+{name:"Aleph",cat:"fpa",st:"B",candidates:[["ashby","aleph"],["lever","aleph"],["gh","aleph"]]},
+{name:"Planful",cat:"fpa",st:"Pub",candidates:[["gh","planful"],["lever","planful"]]},
+{name:"Jirav",cat:"fpa",st:"B",candidates:[["ashby","jirav"],["lever","jirav"],["gh","jirav"]]},
+{name:"Anaplan",cat:"fpa",st:"Pub",candidates:[["gh","anaplan"],["lever","anaplan"]]},
+{name:"OnPlan",cat:"fpa",st:"Seed",candidates:[["ashby","onplan"],["lever","onplan"]]},
+{name:"Prophix",cat:"fpa",st:"Pub",candidates:[["gh","prophix"],["lever","prophix"]]},
+{name:"Ramp",cat:"spend",st:"D+",candidates:[["ashby","ramp"],["gh","ramp"]]},
+{name:"Brex",cat:"spend",st:"Pub",candidates:[["gh","brex"]]},
+{name:"Navan",cat:"spend",st:"D+",candidates:[["gh","tripactions"],["gh","navan"]]},
+{name:"Expensify",cat:"spend",st:"Pub",candidates:[["gh","expensify"],["ashby","expensify"],["lever","expensify"]]},
+{name:"Rho",cat:"spend",st:"B",candidates:[["gh","rho"],["ashby","rho"],["lever","rho"]]},
+{name:"Extend",cat:"spend",st:"B",candidates:[["gh","extend"],["ashby","extend"]]},
+{name:"Center",cat:"spend",st:"B",candidates:[["gh","center"],["ashby","center"],["lever","getcenter"]]},
+{name:"Payhawk",cat:"spend",st:"C",candidates:[["gh","payhawkio"],["gh","payhawk"],["ashby","payhawk"]]},
+{name:"Pleo",cat:"spend",st:"C",candidates:[["gh","pleo"],["ashby","pleo"]]},
+{name:"Stripe",cat:"billing",st:"D+",candidates:[["gh","stripe"]]},
+{name:"Metronome",cat:"billing",st:"Pub",candidates:[["ashby","metronome"],["gh","metronome"],["lever","metronome"]]},
+{name:"Tabs",cat:"billing",st:"B",candidates:[["ashby","tabs"]]},
+{name:"Orb",cat:"billing",st:"Pub",candidates:[["ashby","orb"],["gh","orb"],["lever","orb"]]},
+{name:"Maxio",cat:"billing",st:"Pub",candidates:[["gh","maxio"],["lever","maxio"]]},
+{name:"Chargebee",cat:"billing",st:"D+",candidates:[["gh","chargebee"],["lever","chargebee"]]},
+{name:"Zuora",cat:"billing",st:"Pub",candidates:[["gh","zuora"],["lever","zuora"]]},
+{name:"Recurly",cat:"billing",st:"Pub",candidates:[["gh","recurly"],["lever","recurly"]]},
+{name:"m3ter",cat:"billing",st:"A",candidates:[["ashby","m3ter"],["gh","m3ter"],["lever","m3ter"]]},
+{name:"Sequence",cat:"billing",st:"A",candidates:[["ashby","sequence"],["lever","sequence"]]},
+{name:"Stuut",cat:"billing",st:"Seed",candidates:[["ashby","stuut"],["lever","stuut"]]},
+{name:"Solvimon",cat:"billing",st:"Seed",candidates:[["ashby","solvimon"],["gh","solvimon"],["lever","solvimon"]]},
+{name:"Rillet",cat:"erp",st:"B",candidates:[["ashby","rillet"],["gh","rillet"],["lever","rillet"]]},
+{name:"Campfire",cat:"erp",st:"B",candidates:[["ashby","campfire"],["ashby","meetcampfire"],["gh","campfire"]]},
+{name:"Puzzle",cat:"erp",st:"A",candidates:[["ashby","puzzle"],["lever","puzzle"],["gh","puzzle"]]},
+{name:"Light",cat:"erp",st:"A",candidates:[["ashby","light-inc"],["ashby","light"],["ashby","light.inc"]]},
+{name:"DualEntry",cat:"erp",st:"A",candidates:[["ashby","dualentry"],["lever","dualentry"]]},
+{name:"Everest",cat:"erp",st:"D+",candidates:[["ashby","everest"],["lever","everest"]]},
+{name:"Sage Intacct",cat:"erp",st:"Pub",candidates:[["gh","sage"],["lever","sage"]]},
+{name:"Numeric",cat:"close",st:"B",candidates:[["ashby","numeric"],["lever","numeric"],["gh","numeric"]]},
+{name:"FloQast",cat:"close",st:"D+",candidates:[["gh","floqast"],["lever","floqast"]]},
+{name:"Keeper",cat:"close",st:"B",candidates:[["ashby","keeper"],["lever","keeper"]]},
+{name:"Trullion",cat:"close",st:"B",candidates:[["gh","trullion"],["ashby","trullion"],["lever","trullion"]]},
+{name:"Klarity",cat:"close",st:"B",candidates:[["ashby","klarity"],["lever","klarity"],["gh","klarity"]]},
+{name:"Tipalti",cat:"apar",st:"D+",candidates:[["gh","tipalti"],["lever","tipalti"]]},
+{name:"Melio",cat:"apar",st:"D+",candidates:[["gh","melio"],["ashby","melio"]]},
+{name:"Stampli",cat:"apar",st:"D+",candidates:[["gh","stampli"],["lever","stampli"],["ashby","stampli"]]},
+{name:"Settle",cat:"apar",st:"B",candidates:[["gh","settle"],["ashby","settle"],["lever","settle"]]},
+{name:"BILL",cat:"apar",st:"Pub",candidates:[["gh","bill"],["lever","bill"]]},
+{name:"Fazeshift",cat:"apar",st:"A",candidates:[["ashby","fazeshift"],["gh","fazeshift"],["lever","fazeshift"]]},
+{name:"Zip",cat:"proc",st:"D+",candidates:[["ashby","zip"],["gh","zip"],["lever","zip"]]},
+{name:"Tropic",cat:"proc",st:"B",candidates:[["gh","tropic"],["ashby","tropic"],["lever","tropic"]]},
+{name:"Vendr",cat:"proc",st:"B",candidates:[["gh","vendr"],["ashby","vendr"],["lever","vendr"]]},
+{name:"Oomnitza",cat:"proc",st:"B",candidates:[["gh","oomnitza"],["lever","oomnitza"]]},
+{name:"Mercury",cat:"bank",st:"C",candidates:[["gh","mercury"]]},
+{name:"Meow",cat:"bank",st:"B",candidates:[["ashby","meow"],["lever","meow"]]},
+{name:"Arc",cat:"bank",st:"A",candidates:[["ashby","arc"],["gh","arc"],["lever","arc"]]},
+{name:"Highbeam",cat:"bank",st:"A",candidates:[["ashby","highbeam"],["lever","highbeam"]]},
+{name:"Basis",cat:"ai",st:"B",candidates:[["ashby","basis"],["lever","basis"],["gh","basis"]]},
+{name:"Truewind",cat:"ai",st:"A",candidates:[["ashby","truewind"],["lever","truewind"],["gh","truewind"]]},
+{name:"Fieldguide",cat:"ai",st:"B",candidates:[["ashby","fieldguide"],["lever","fieldguide"],["gh","fieldguide"]]},
+{name:"Digits",cat:"ai",st:"C",candidates:[["ashby","digits"],["gh","digits"],["lever","digits"]]},
+{name:"Pilot",cat:"ai",st:"C",candidates:[["gh","pilothq"],["gh","pilot"],["ashby","pilot"],["lever","pilot"]]},
+{name:"Black Ore",cat:"ai",st:"A",candidates:[["ashby","black-ore"],["ashby","blackore"],["lever","blackore"]]},
+{name:"Zeni",cat:"ai",st:"B",candidates:[["ashby","zeni"],["lever","zeni"],["gh","zeni"]]},
+{name:"Juno (Tax AI)",cat:"ai",st:"Seed",candidates:[["ashby","juno"],["gh","juno"],["lever","juno"]]},
+{name:"Juniper Square",cat:"invest",st:"D+",candidates:[["ashby","junipersquare"],["ashby","juniper-square"],["gh","junipersquare"],["lever","junipersquare"]]},
+{name:"Carta",cat:"invest",st:"D+",candidates:[["gh","carta"],["ashby","carta"],["lever","carta"]]},
+{name:"Addepar",cat:"invest",st:"D+",candidates:[["gh","addepar"],["gh","addepar1"],["lever","addepar"]]},
+{name:"AngelList",cat:"invest",st:"B",candidates:[["ashby","angellist"],["lever","angellist"],["gh","angellist"]]},
+/* ---- AI INFERENCE & INFRA ---- */
+{name:"Baseten",cat:"inference",st:"C",candidates:[["ashby","baseten"]]},
+{name:"Modal",cat:"inference",st:"B",candidates:[["ashby","modal"]]},
+{name:"Fireworks AI",cat:"inference",st:"B",candidates:[["gh","fireworksai"],["ashby","fireworks.ai"]]},
+{name:"Together AI",cat:"inference",st:"B",candidates:[["gh","togetherai"],["ashby","together-ai"],["lever","together"]]},
+{name:"Groq",cat:"inference",st:"D+",candidates:[["gh","groq"],["ashby","groq"],["lever","groq"]]},
+{name:"Cerebras",cat:"inference",st:"D+",candidates:[["ashby","cerebras"],["gh","cerebras"]]},
+{name:"Lambda",cat:"inference",st:"D+",candidates:[["ashby","Lambda"],["ashby","lambda"],["gh","lambda"]]},
+{name:"CoreWeave",cat:"inference",st:"Pub",candidates:[["gh","coreweave"],["ashby","coreweave"]]},
+{name:"Anyscale",cat:"inference",st:"C",candidates:[["gh","anyscale"],["ashby","anyscale"],["lever","anyscale"]]},
+/* ---- DEV TOOLS & AI CODING ---- */
+{name:"Cursor",cat:"devtools",st:"C",candidates:[["ashby","cursor"],["ashby","anysphere"]]},
+{name:"Cognition",cat:"devtools",st:"B",candidates:[["ashby","cognition"]]},
+{name:"Replit",cat:"devtools",st:"B",candidates:[["ashby","replit"]]},
+{name:"Vercel",cat:"devtools",st:"D+",candidates:[["gh","vercel"],["ashby","vercel"]]},
+{name:"Linear",cat:"devtools",st:"C",candidates:[["ashby","linear"]]},
+{name:"Supabase",cat:"devtools",st:"D+",candidates:[["ashby","supabase"],["gh","supabase"]]},
+{name:"LangChain",cat:"devtools",st:"B",candidates:[["ashby","langchain"],["gh","langchain"],["lever","langchain"]]},
+/* ---- HR TECH & PAYROLL ---- */
+{name:"HiBob",cat:"hrtech",st:"D+",candidates:[["gh","hibob"]]},
+{name:"Gusto",cat:"hrtech",st:"D+",candidates:[["gh","gusto"]]},
+{name:"Deel",cat:"hrtech",st:"D+",candidates:[["ashby","deel"],["gh","deel"]]},
+{name:"Rippling",cat:"hrtech",st:"D+",candidates:[["gh","rippling"]]},
+{name:"Remote",cat:"hrtech",st:"C",candidates:[["gh","remotecom"],["gh","remote"]]},
+{name:"Lattice",cat:"hrtech",st:"D+",candidates:[["gh","lattice"],["ashby","lattice"]]},
+{name:"Justworks",cat:"hrtech",st:"D+",candidates:[["gh","justworks"],["lever","justworks"]]},
+{name:"Oyster",cat:"hrtech",st:"D+",candidates:[["gh","oysterhr"],["ashby","oyster"],["lever","oyster"]]},
+/* ---- VERTICAL AI AGENTS ---- */
+{name:"Harvey",cat:"agents",st:"D+",candidates:[["ashby","harvey"]]},
+{name:"Sierra",cat:"agents",st:"B",candidates:[["ashby","sierra"],["ashby","Sierra"]]},
+{name:"Decagon",cat:"agents",st:"C",candidates:[["ashby","decagon"]]},
+{name:"EvenUp",cat:"agents",st:"D+",candidates:[["ashby","evenup"]]},
+{name:"ElevenLabs",cat:"agents",st:"C",candidates:[["ashby","elevenlabs"]]},
+{name:"Cresta",cat:"agents",st:"D+",candidates:[["gh","cresta"],["lever","cresta"],["ashby","cresta"]]},
+{name:"11x",cat:"agents",st:"B",candidates:[["ashby","11x"],["gh","11x"]]},
+/* ---- CYBERSECURITY ---- */
+{name:"Vanta",cat:"cyber",st:"C",candidates:[["ashby","vanta"]]},
+{name:"Snyk",cat:"cyber",st:"D+",candidates:[["gh","snyk"],["lever","snyk"]]},
+{name:"Abnormal",cat:"cyber",st:"D+",candidates:[["gh","abnormalsecurity"],["ashby","abnormal"],["gh","abnormal"]]},
+{name:"Chainguard",cat:"cyber",st:"D+",candidates:[["gh","chainguard"],["ashby","chainguard"],["lever","chainguard"]]},
+{name:"Drata",cat:"cyber",st:"C",candidates:[["gh","drata"],["ashby","drata"],["lever","drata"]]},
+{name:"Cyera",cat:"cyber",st:"D+",candidates:[["ashby","cyera"],["gh","cyera"],["lever","cyera"]]},
+{name:"Wiz",cat:"cyber",st:"Pub",candidates:[["gh","wizinc"],["gh","wiz"],["ashby","wiz"]]},
+{name:"Semgrep",cat:"cyber",st:"C",candidates:[["gh","semgrep"],["ashby","semgrep"],["lever","semgrep"]]},
+/* ---- FRONTIER AI LABS ---- */
+{name:"OpenAI",cat:"labs",st:"D+",candidates:[["ashby","openai"]]},
+{name:"Anthropic",cat:"labs",st:"D+",candidates:[["gh","anthropic"]]},
+{name:"Perplexity",cat:"labs",st:"D+",candidates:[["ashby","Perplexity"],["ashby","perplexity-ai"],["ashby","perplexity"]]},
+{name:"Mistral AI",cat:"labs",st:"D+",candidates:[["lever","mistral"],["ashby","mistral"],["gh","mistral"]]},
+{name:"xAI",cat:"labs",st:"D+",candidates:[["gh","xai"],["ashby","xai"],["lever","xai"]]},
+/* ---- HEALTHCARE AI ---- */
+{name:"Abridge",cat:"healthai",st:"D+",candidates:[["ashby","abridge"]]},
+{name:"Hippocratic AI",cat:"healthai",st:"D+",candidates:[["ashby","Hippocratic AI"],["ashby","hippocratic-ai"]]},
+{name:"Ambience",cat:"healthai",st:"C",candidates:[["ashby","ambiencehealthcare"],["gh","ambiencehealthcare"],["ashby","ambience"]]},
+{name:"OpenEvidence",cat:"healthai",st:"B",candidates:[["ashby","openevidence"],["gh","openevidence"]]},
+{name:"Commure",cat:"healthai",st:"D+",candidates:[["gh","commure"],["ashby","commure"],["lever","commure"]]},
+{name:"Tennr",cat:"healthai",st:"B",candidates:[["ashby","tennr"],["gh","tennr"],["lever","tennr"]]},
+{name:"SmarterDx",cat:"healthai",st:"B",candidates:[["gh","smarterdx"],["ashby","smarterdx"],["lever","smarterdx"]]},
+];
+
+/* ============ CLASSIFICATION: GTM (CS/Sales/Marketing) vs ENG (SWE/Product) ============ */
+const SUBS={GTM:["Customer Success & Post-Sales","Sales","Marketing"],
+ENG:["Software Engineering","Product & Design"],OTHER:["Everything Else"]};
+function classify(title,dept){
+const t=(" "+title+" "+(dept||"")+" ").toLowerCase();
+const has=(...ws)=>ws.some(w=>t.includes(w));
+if(has("marketing","brand ","content ","demand gen","seo ","growth market","communications","public relations"," pmm ","events manager","community manager","social media"))
+return {p:"GTM",s:"Marketing"};
+if(has("customer success","customer experience","account manager","account management","implementation","onboarding","activation","customer support","technical support","support specialist","support engineer","solutions architect","solutions consultant","solutions engineer","professional services","customer education","customer advocacy","renewal","post-sales","postsales","strategic advisor","client success","technical account","customer engineer","deployment strategist","forward deployed"))
+return {p:"GTM",s:"Customer Success & Post-Sales"};
+if(has("sales","account executive","sdr","bdr","business development","partnerships","alliances","revenue operations","revops","go-to-market","pre-sales","presales","account development","revenue enablement","deal desk"))
+return {p:"GTM",s:"Sales"};
+if(has("product manager","product management","product designer","product design","product operations","product lead","product analyst","head of product","product owner","ux ","ui designer","design lead","staff designer","senior designer"))
+return {p:"ENG",s:"Product & Design"};
+if(has("engineer","engineering","developer","devops","sre","site reliability","infrastructure","security","data scientist","data science","machine learning"," ml ","backend","frontend","front-end","back-end","full stack","full-stack","software","qa ","quality assurance","architect","technical program","research scientist","researcher"))
+return {p:"ENG",s:"Software Engineering"};
+return {p:"OTHER",s:"Everything Else"};
+}
+const POSTSALES_RX=/(account manager|customer success|implementation|onboarding|activation|strategic advisor|renewal|post.?sales|client success|technical account|solutions architect|solutions engineer|forward deployed)/i;
+
+/* Work mode: hybrid > remote > in-person. */
+const MODE_LBL={remote:"🏠 Remote",hybrid:"⇄ Hybrid",onsite:"🏢 In-person"};
+function workMode(j){
+const l=(j.loc||"").toLowerCase(), wp=(j.wp||"").toLowerCase();
+if(wp.includes("hybrid")||l.includes("hybrid")) return "hybrid";
+if(wp.includes("remote")||j.remote===true||/remote|distributed|anywhere|work.?from.?home|wfh/.test(l)) return "remote";
+return "onsite";
+}
+
+/* ============ FEED FETCHERS (public CORS-friendly APIs) ============ */
+/* fetch with a hard 10s timeout so dead slugs can't hang the loader */
+function tfetch(url){
+const ac=new AbortController();
+const t=setTimeout(()=>ac.abort(),10000);
+return fetch(url,{signal:ac.signal}).finally(()=>clearTimeout(t));
+}
+async function fetchGH(slug){
+const r=await tfetch(`https://boards-api.greenhouse.io/v1/boards/${slug}/jobs`);
+if(!r.ok) throw 0;
+const d=await r.json();
+if(!d.jobs||!d.jobs.length) throw 0;
+return d.jobs.map(j=>({title:j.title,url:j.absolute_url,loc:j.location?j.location.name:"",
+dept:(j.metadata||[]).map(m=>m.value).filter(v=>typeof v==="string").join(" "),
+date:j.first_published||j.updated_at||null}));
+}
+async function fetchLever(slug){
+const r=await tfetch(`https://api.lever.co/v0/postings/${slug}?mode=json`);
+if(!r.ok) throw 0;
+const d=await r.json();
+if(!Array.isArray(d)||!d.length) throw 0;
+return d.map(j=>({title:j.text,url:j.hostedUrl,loc:(j.categories&&j.categories.location)||"",
+dept:[(j.categories||{}).team,(j.categories||{}).department].filter(Boolean).join(" "),
+date:j.createdAt?new Date(j.createdAt).toISOString():null,wp:j.workplaceType||""}));
+}
+async function fetchAshby(slug){
+const r=await tfetch(`https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(slug)}`);
+if(!r.ok) throw 0;
+const d=await r.json();
+if(!d.jobs||!d.jobs.length) throw 0;
+return d.jobs.filter(j=>j.isListed!==false).map(j=>({title:j.title,url:j.jobUrl||j.applyUrl,
+loc:j.location||"",dept:[j.department,j.team].filter(Boolean).join(" "),
+date:j.publishedAt||null,remote:j.isRemote===true}));
+}
+const FETCHERS={gh:fetchGH,lever:fetchLever,ashby:fetchAshby};
+
+/* ============ LOAD ============ */
+let ALL=[];
+const coState={};
+let shown=100;
+const USRX=/(united states|usa|\bus\b|new york|san francisco|nyc|austin|denver|seattle|boston|chicago|salt lake|portland|los angeles|miami|atlanta|,\s?[A-Za-z]{2}$)/i;
+
+async function loadCompany(c){
+for(const [type,slug] of c.candidates){
+const f=FETCHERS[type]; if(!f) continue;
+try{
+const jobs=await f(slug);
+coState[c.name]={status:"ok",count:jobs.length,ats:type};
+for(const j of jobs){
+const cls=classify(j.title,j.dept);
+ALL.push({...j,co:c.name,cat:c.cat,sec:CAT_SEC[c.cat],st:c.st,p:cls.p,s:cls.s,
+mode:workMode(j),
+us:USRX.test(j.loc)||j.loc===""});
+}
+return;
+}catch(e){/* try next */}
+}
+coState[c.name]={status:"err",count:0,ats:null};
+}
+
+/* Cached-first loading: the GitHub Action commits data/jobs.json every 6h.
+   Visitors get one instant download instead of ~120 live API calls.
+   Falls back to live fetching if the cache is missing (e.g. local file). */
+async function loadCached(){
+try{
+const r=await fetch("data/jobs.json",{cache:"no-cache"});
+if(!r.ok) return false;
+const d=await r.json();
+if(!d.jobs||!d.jobs.length) return false;
+ALL=[];
+for(const c of d.companies) coState[c.name]={status:c.status,count:c.count,ats:c.ats};
+const byName=Object.fromEntries(COMPANIES.map(c=>[c.name,c]));
+for(const j of d.jobs){
+const c=byName[j.co]; if(!c) continue;
+const cls=classify(j.title,j.dept);
+ALL.push({...j,cat:c.cat,sec:CAT_SEC[c.cat],st:c.st,p:cls.p,s:cls.s,
+mode:workMode(j),us:USRX.test(j.loc)||j.loc===""});
+}
+const age=Math.max(0,Math.round((Date.now()-new Date(d.generated).getTime())/36e5));
+document.getElementById("pbar").style.width="100%";
+document.getElementById("stStatus").innerHTML=`updated ${age}h ago · <a href="#" id="liveBtn" style="text-decoration:underline;color:var(--accent)">refresh live</a>`;
+document.getElementById("liveBtn").onclick=e=>{e.preventDefault();
+ALL=[];Object.keys(coState).forEach(k=>delete coState[k]);
+document.getElementById("pbar").style.width="0";liveLoad();};
+window.__feedsDone=true;
+render();
+return true;
+}catch(e){return false;}
+}
+
+async function loadAll(){
+if(await loadCached()) return;
+await liveLoad();
+}
+
+async function liveLoad(){
+let done=0;
+const queue=[...COMPANIES];
+const workers=Array.from({length:4},async()=>{
+while(queue.length){
+const c=queue.shift();
+await loadCompany(c);
+done++;
+document.getElementById("pbar").style.width=(done/COMPANIES.length*100)+"%";
+document.getElementById("stStatus").textContent=`${done}/${COMPANIES.length} feeds`;
+if(done%6===0) render();
+}
+});
+await Promise.all(workers);
+/* self-healing: one parallel retry pass for rate-limit hiccups */
+let errs=COMPANIES.filter(c=>coState[c.name]&&coState[c.name].status==="err");
+if(errs.length){
+document.getElementById("stStatus").textContent=`retrying ${errs.length} feeds…`;
+await new Promise(r=>setTimeout(r,3000));
+const q2=[...errs];
+await Promise.all(Array.from({length:4},async()=>{while(q2.length){await loadCompany(q2.shift());}}));
+errs=COMPANIES.filter(c=>coState[c.name]&&coState[c.name].status==="err");
+}
+document.getElementById("stStatus").textContent=errs.length
+?`feeds loaded — ${errs.length} without public boards (click red dots to retry)`
+:"feeds up to date ✔";
+window.__feedsDone=true;
+render();
+}
+
+/* ============ STATE + RENDER ============ */
+const S={p:"ALL",sub:null,secs:new Set(),cats:new Set(),co:null,q:"",modes:new Set(),stages:new Set(),us:false,sort:"new",postsales:false,party:false};
+
+function subChips(){
+const el=document.getElementById("subchips");
+let subs=S.p==="ALL"?[]:SUBS[S.p]||[];
+let html="";
+if(S.p==="ALL"||S.p==="GTM")
+html+=`<button class="chip star ${S.postsales?"on":""}" id="psChip">★ Post-Sales / CS-AM spotlight</button>`;
+html+=subs.map(s=>`<button class="chip ${S.sub===s?"on":""}" data-s="${s}">${s}</button>`).join("");
+el.innerHTML=html;
+el.querySelectorAll(".chip[data-s]").forEach(b=>b.onclick=()=>{S.sub=S.sub===b.dataset.s?null:b.dataset.s;render();});
+const ps=document.getElementById("psChip");
+if(ps) ps.onclick=()=>{S.postsales=!S.postsales;render();};
+}
+
+function filtered(){
+const q=S.q.toLowerCase();
+let arr=ALL.filter(j=>
+(S.p==="ALL"||j.p===S.p)&&(!S.sub||j.s===S.sub)&&
+(!S.secs.size||S.secs.has(j.sec))&&(!S.cats.size||S.cats.has(j.cat))&&
+(!S.co||j.co===S.co)&&(!S.modes.size||S.modes.has(j.mode))&&(!S.stages.size||S.stages.has(j.st))&&(!S.us||j.us)&&
+(!S.party||FAVS.has(j.url))&&
+(!S.postsales||POSTSALES_RX.test(j.title))&&
+(!q||(j.title+" "+j.co+" "+j.loc).toLowerCase().includes(q)));
+if(S.sort==="new") arr.sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+else if(S.sort==="co") arr.sort((a,b)=>a.co.localeCompare(b.co)||a.title.localeCompare(b.title));
+else arr.sort((a,b)=>a.title.localeCompare(b.title));
+return arr;
+}
+
+function daysAgo(d){
+if(!d) return "";
+const days=Math.floor((Date.now()-new Date(d).getTime())/864e5);
+if(days<=0) return "today";
+if(days===1) return "1 day ago";
+if(days<30) return days+" days ago";
+const m=Math.floor(days/30);
+return m+(m===1?" month ago":" months ago");
+}
+
+function render(){
+subChips();
+const arr=filtered();
+document.getElementById("stJobs").textContent=ALL.length;
+document.getElementById("stCos").textContent=Object.values(coState).filter(s=>s.status==="ok").length;
+document.getElementById("stGtm").textContent=ALL.filter(j=>j.p==="GTM").length;
+document.getElementById("stEng").textContent=ALL.filter(j=>j.p==="ENG").length;
+document.getElementById("count").textContent=`A WILD ${arr.length} JOBS APPEARED!`+(S.co?` @ ${S.co.toUpperCase()}`:"");
+const list=document.getElementById("list");
+const slice=arr.slice(0,shown);
+list.innerHTML=slice.map(j=>{
+const cls=j.p==="GTM"?"gtm":j.p==="ENG"?"eng":"other";
+const fresh=j.date&&(Date.now()-new Date(j.date).getTime())<7*864e5;
+return `<a class="card" href="${j.url}" target="_blank" rel="noopener">
+<div class="top">
+<div><div class="title">${esc(j.title)}</div>
+<div class="co-name"><img class="spr" src="${SPR(CAT_SPR[j.cat])}" alt="">${esc(j.co)} · <span style="color:var(--muted)">${CATS[j.cat]}${STAGE_LBL[j.st]?" · "+STAGE_LBL[j.st]:""}</span></div></div>
+<div style="display:flex;gap:8px;align-items:center;flex:none">
+<span class="badge ${cls}">${j.p==="ENG"?"ENG":j.p}</span>
+<button class="pball ${FAVS.has(j.url)?"on":""}" data-url="${esc(j.url)}" data-title="${esc(j.title)}" data-co="${esc(j.co)}" data-loc="${esc(j.loc)}" title="${FAVS.has(j.url)?"Release from party":"Catch this role"}">◓</button>
+</div>
+</div>
+<div class="bottom">
+<span>📍 ${esc(j.loc)||"—"}</span><span>${MODE_LBL[j.mode]||""}</span><span>${esc(j.s)}</span>
+${j.date?`<span class="${fresh?"new":""}">${fresh?"NEW! ":""}${daysAgo(j.date)}</span>`:""}
+</div></a>`;
+}).join("")||`<div class="empty"><img src="${SPR(P.psyduck)}" alt="Psyduck">Psyduck is confused… no roles match.<br>Try widening filters. (Red dots in the sidebar = feed slug needs updating.)</div>`;
+document.getElementById("more").style.display=arr.length>shown?"block":"none";
+renderSide();
+}
+
+function renderSide(){
+const side=document.getElementById("side");
+let html="";
+for(const sec of Object.keys(SECTORS)){
+const secCats=Object.keys(CATS).filter(k=>CAT_SEC[k]===sec&&COMPANIES.some(c=>c.cat===k));
+if(!secCats.length) continue;
+const multi=secCats.length>1;
+html+=`<h2><img class="spr" src="${SPR(multi?P.pikachu:CAT_SPR[secCats[0]])}" width="30" height="30" alt="">${SECTORS[sec]}</h2>`;
+for(const key of secCats){
+const cos=COMPANIES.filter(c=>c.cat===key);
+if(!cos.length) continue;
+if(multi)
+html+=`<h3><img class="spr" src="${SPR(CAT_SPR[key])}" alt="">${CATS[key]}</h3>`;
+html+=cos.map(c=>{
+const st=coState[c.name]||{};
+const dot=st.status==="ok"?"ok":st.status==="err"?"err":"";
+return `<div class="co ${S.co===c.name?"on":""}" data-co="${esc(c.name)}">
+<span class="dot ${dot}"></span>${esc(c.name)}<span class="n">${st.count||""}</span></div>`;
+}).join("");
+}
+}
+side.innerHTML=html;
+side.querySelectorAll(".co").forEach(el=>el.onclick=async()=>{
+const name=el.dataset.co,st=coState[name];
+if(st&&st.status==="err"){ /* red dot → retry that feed */
+const c=COMPANIES.find(x=>x.name===name);
+coState[name]={status:"",count:0};renderSide();
+await loadCompany(c);render();return;
+}
+S.co=S.co===name?null:name;shown=100;render();
+});
+}
+
+function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+
+/* ============ WIRING ============ */
+document.getElementById("tabs").addEventListener("click",e=>{
+const b=e.target.closest(".tab"); if(!b) return;
+if(b.id==="partyTab"){
+if(!USER){openLogin();return;}
+S.party=!S.party;b.classList.toggle("on",S.party);shown=100;render();return;
+}
+document.querySelectorAll(".tab").forEach(t=>{if(t.id!=="partyTab")t.classList.remove("on","gtm","eng");});
+b.classList.add("on");
+if(b.dataset.p==="GTM") b.classList.add("gtm");
+if(b.dataset.p==="ENG") b.classList.add("eng");
+S.p=b.dataset.p; S.sub=null; shown=100; render();
+});
+document.getElementById("q").addEventListener("input",e=>{S.q=e.target.value;shown=100;render();});
+document.getElementById("usOnly").addEventListener("change",e=>{S.us=e.target.checked;render();});
+document.getElementById("sortSel").addEventListener("change",e=>{S.sort=e.target.value;render();});
+document.getElementById("more").addEventListener("click",()=>{shown+=100;render();});
+/* multi-select dropdowns: pick any combination; empty = all */
+function makeMsel(elId,allLabel,options,set,onChange){
+const el=document.getElementById(elId);
+el.className="msel";
+const btn=document.createElement("button");
+const panel=document.createElement("div");panel.className="panel";
+const sync=()=>{
+btn.textContent=set.size?`${allLabel}: ${set.size} ▾`:`${allLabel} ▾`;
+panel.querySelectorAll(".opt[data-k]").forEach(o=>{
+const on=set.has(o.dataset.k);
+o.classList.toggle("on",on);
+o.querySelector(".bx").textContent=on?"▣":"▢";
+});
+};
+const clr=document.createElement("div");clr.className="opt";
+clr.innerHTML=`<span class="bx">✦</span>All (clear)`;
+clr.onclick=()=>{set.clear();shown=100;sync();(onChange||render)();};
+panel.appendChild(clr);
+for(const [k,v] of Object.entries(options)){
+const d=document.createElement("div");d.className="opt";d.dataset.k=k;
+d.innerHTML=`<span class="bx">▢</span>${v}`;
+d.onclick=()=>{set.has(k)?set.delete(k):set.add(k);shown=100;sync();(onChange||render)();};
+panel.appendChild(d);
+}
+btn.onclick=e=>{e.stopPropagation();
+document.querySelectorAll(".msel.open").forEach(m=>{if(m!==el)m.classList.remove("open");});
+el.classList.toggle("open");};
+el.appendChild(btn);el.appendChild(panel);sync();
+}
+makeMsel("secMs","Sectors",SECTORS,S.secs);
+makeMsel("catMs","Categories",CATS,S.cats);
+makeMsel("stageMs","Stages",STAGE_LBL,S.stages);
+makeMsel("modeMs","Work mode",MODE_LBL,S.modes);
+document.addEventListener("click",e=>{
+if(!e.target.closest(".msel")) document.querySelectorAll(".msel.open").forEach(m=>m.classList.remove("open"));
+});
+
+/* ============ VIEW SWITCHING ============ */
+const vBoard=document.getElementById("vBoard"),vIndex=document.getElementById("vIndex");
+function setView(ix){
+vBoard.classList.toggle("on",!ix);vIndex.classList.toggle("on",ix);
+document.getElementById("boardView").style.display=ix?"none":"";
+document.getElementById("boardControls").style.display=ix?"none":"";
+document.getElementById("indexView").classList.toggle("on",ix);
+window.scrollTo({top:0,behavior:"instant"});
+if(ix) renderIndex();
+}
+vBoard.onclick=()=>setView(false);
+vIndex.onclick=()=>setView(true);
+
+/* ============================================================
+HIRING INDEX
+INDEX_DATA holds one point per monthly snapshot. The monthly
+scheduled task appends a point (via buildIndexPoint()) and
+saves the full role-level snapshot to snapshots/YYYY-MM.json.
+============================================================ */
+const INDEX_DATA=[
+/* one point per monthly snapshot — appended by the monthly-hiring-index-snapshot task */
+{month:"2026-07",total:6862,gtm:2490,eng:2668,
+bySec:{fin:2468,labs:1446,agents:940,inference:636,devtools:449,hrtech:412,cyber:309,healthai:202}},
+];
+const IX_COLORS={fin:"#f8d030",inference:"#3b9cff",devtools:"#b56cff",hrtech:"#ff9dda",
+agents:"#30d030",cyber:"#e3350d",labs:"#ffffff",healthai:"#5adbdb",__agg:"#f8d030"};
+const ixSel=new Set(); let ixAgg=true; let ixChart=null,ixSplitChart=null;
+
+function ixChips(){
+const el=document.getElementById("ixSecChips");
+let html=`<button class="chip ${ixAgg?"on":""}" data-agg="1">Σ Aggregate</button>`;
+html+=Object.entries(SECTORS).map(([k,v])=>`<button class="chip ${ixSel.has(k)?"on":""}" data-sec="${k}">${v}</button>`).join("");
+el.innerHTML=html;
+el.querySelector("[data-agg]").onclick=()=>{ixAgg=!ixAgg;renderIndex();};
+el.querySelectorAll("[data-sec]").forEach(b=>b.onclick=()=>{
+const k=b.dataset.sec; ixSel.has(k)?ixSel.delete(k):ixSel.add(k); renderIndex();});
+}
+
+function liveIndexPoint(){
+/* live (unsaved) point from the currently loaded feeds */
+const p={month:new Date().toISOString().slice(0,7)+" (live)",total:ALL.length,
+gtm:ALL.filter(j=>j.p==="GTM").length,eng:ALL.filter(j=>j.p==="ENG").length,bySec:{},byCo:{}};
+for(const k of Object.keys(SECTORS)) p.bySec[k]=ALL.filter(j=>j.sec===k).length;
+for(const[n,s]of Object.entries(coState)) if(s.status==="ok") p.byCo[n]=s.count;
+return p;
+}
+
+function renderIndex(){
+ixChips();
+const pts=[...INDEX_DATA];
+if(window.__feedsDone) pts.push(liveIndexPoint());
+const labels=pts.map(p=>p.month);
+const stats=document.getElementById("ixStats");
+const last=pts[pts.length-1],prev=pts.length>1?pts[pts.length-2]:null;
+const delta=(a,b)=>{if(b==null)return"";const d=a-b;return`<div class="d ${d>=0?"up":"down"}">${d>=0?"▲":"▼"} ${Math.abs(d)} vs last snapshot</div>`;};
+let statHtml="";
+if(last){
+statHtml+=`<div class="ix-stat"><div class="k">All sectors</div><div class="v">${last.total}</div>${prev?delta(last.total,prev.total):""}</div>`;
+statHtml+=`<div class="ix-stat"><div class="k">GTM roles</div><div class="v">${last.gtm}</div>${prev?delta(last.gtm,prev.gtm):""}</div>`;
+statHtml+=`<div class="ix-stat"><div class="k">Engineering</div><div class="v">${last.eng}</div>${prev?delta(last.eng,prev.eng):""}</div>`;
+for(const[k,v]of Object.entries(SECTORS)){
+if(ixSel.size&&!ixSel.has(k))continue;
+statHtml+=`<div class="ix-stat"><div class="k">${v}</div><div class="v">${last.bySec[k]??"–"}</div>${prev?delta(last.bySec[k]||0,prev.bySec[k]||0):""}</div>`;
+}
+}
+stats.innerHTML=statHtml||`<div class="ix-stat"><div class="k">Status</div><div class="v">Feeds loading…</div></div>`;
+const dss=[];
+if(ixAgg) dss.push({label:"All sectors",data:pts.map(p=>p.total),borderColor:IX_COLORS.__agg,backgroundColor:"transparent",borderWidth:3,pointRadius:5});
+const secKeys=ixSel.size?[...ixSel]:(ixAgg?[]:Object.keys(SECTORS));
+for(const k of secKeys)
+dss.push({label:SECTORS[k],data:pts.map(p=>(p.bySec||{})[k]??null),borderColor:IX_COLORS[k],backgroundColor:"transparent",borderWidth:2,pointRadius:4});
+const gridCfg={color:"rgba(59,76,202,.25)"},tickCfg={color:"#9aa5bd",font:{family:"VT323",size:16}};
+const mkOpts={responsive:true,maintainAspectRatio:false,
+plugins:{legend:{labels:{color:"#e8ecf3",font:{family:"VT323",size:17}}}},
+scales:{x:{grid:gridCfg,ticks:tickCfg},y:{grid:gridCfg,ticks:tickCfg,beginAtZero:true}}};
+if(ixChart)ixChart.destroy();
+ixChart=new Chart(document.getElementById("ixChart"),{type:"line",data:{labels,datasets:dss},options:mkOpts});
+if(ixSplitChart)ixSplitChart.destroy();
+ixSplitChart=new Chart(document.getElementById("ixSplitChart"),{type:"line",
+data:{labels,datasets:[
+{label:"GTM",data:pts.map(p=>p.gtm),borderColor:"#e3350d",backgroundColor:"transparent",borderWidth:2,pointRadius:4},
+{label:"Engineering",data:pts.map(p=>p.eng),borderColor:"#3b9cff",backgroundColor:"transparent",borderWidth:2,pointRadius:4}]},
+options:mkOpts});
+document.getElementById("ixFoot").innerHTML=INDEX_DATA.length<2
+?`⏳ ${INDEX_DATA.length===0?"No snapshots saved yet — the live point shows current feeds.":"Baseline recorded "+INDEX_DATA[0].month+"."} Real trends appear once there are 2+ monthly snapshots. Snapshots run on the 1st of each month.`
+:`${INDEX_DATA.length} monthly snapshots recorded. Latest: ${INDEX_DATA[INDEX_DATA.length-1].month}.`;
+}
+
+/* ============ SNAPSHOT EXPORT (used by the monthly scheduled task) ============ */
+function buildIndexPoint(){
+const p=liveIndexPoint(); p.month=new Date().toISOString().slice(0,7); return p;
+}
+window.exportSnapshot=function(){
+const snap={date:new Date().toISOString(),point:buildIndexPoint(),
+companies:Object.entries(coState).map(([name,s])=>{
+const c=COMPANIES.find(x=>x.name===name)||{};
+return{name,cat:c.cat,sec:CAT_SEC[c.cat],st:c.st,status:s.status,ats:s.ats,count:s.count};}),
+roles:ALL.map(j=>({co:j.co,sec:j.sec,cat:j.cat,title:j.title,p:j.p,s:j.s,mode:j.mode,us:j.us,loc:j.loc,date:j.date,url:j.url}))};
+const blob=new Blob([JSON.stringify(snap,null,1)],{type:"application/json"});
+const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+a.download="finstack-snapshot-"+snap.point.month+".json";
+document.body.appendChild(a);a.click();a.remove();
+return "exported "+snap.roles.length+" roles across "+snap.companies.filter(c=>c.status==="ok").length+" companies";
+};
+
+/* ============================================================
+TRAINER SYSTEM — Supabase auth, profiles, caught roles, resume
+============================================================ */
+const SB_URL="https://uihtulngkgyionrbtaen.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpaHR1bG5na2d5aW9ucmJ0YWVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQ3NzA1MTIsImV4cCI6MjEwMDM0NjUxMn0.2kCsZ417ysSzQalgyZK8lsttD7_hM2IOphhotd8vwHE";
+const sb=window.supabase?window.supabase.createClient(SB_URL,SB_KEY):null;
+let USER=null,PROFILE=null;
+const FAVS=new Map(); // url -> {url,title,co,loc}
+const PARTNERS=[25,133,6,9,3,143,94,149,131,214];
+const AVATARS=["red","leaf","ethan","lyra","brendan","may","dawn","cynthia","blue","lance","brock","misty"];
+const TSPR=n=>`https://play.pokemonshowdown.com/sprites/trainers/${n}.png`;
+
+const overlay=document.getElementById("overlay"),mbox=document.getElementById("mbox");
+overlay.addEventListener("click",e=>{if(e.target===overlay)overlay.classList.remove("open");});
+function closeModal(){overlay.classList.remove("open");}
+
+function renderTrainer(){
+const box=document.getElementById("trainerBox");
+if(!sb){box.innerHTML="";return;}
+if(!USER){
+box.innerHTML=`<button class="trainerbtn" id="becomeBtn">BECOME A TRAINER</button>`;
+document.getElementById("becomeBtn").onclick=openLogin;
+}else{
+const sp=(PROFILE&&PROFILE.partner_sprite)||25;
+const nm=(PROFILE&&PROFILE.trainer_name)||USER.email.split("@")[0];
+const av=(PROFILE&&PROFILE.avatar)?TSPR(PROFILE.avatar):SPR(sp);
+box.innerHTML=`<div class="trainerchip" id="tchip"><img src="${av}" alt="">${esc(nm)} ▾</div>`;
+document.getElementById("tchip").onclick=openCard;
+}
+const pt=document.getElementById("partyTab");
+if(pt) pt.textContent=`◓ PARTY${FAVS.size?" ("+FAVS.size+")":""}`;
+}
+
+function openLogin(){
+mbox.innerHTML=`<h2>BECOME A TRAINER</h2>
+<div class="mnote">One signup does it all: save roles to your party, build a trainer card, upload your resume — and you're on the monthly newsletter. We'll email you a magic sign-in link, no password.</div>
+<label>Email</label><input type="email" id="authEmail" placeholder="you@email.com">
+<div class="mrow"><button class="mbtn" id="sendLink">SEND MAGIC LINK</button>
+<button class="mbtn alt" id="cancelBtn">CANCEL</button></div>
+<div id="authMsg"></div>`;
+overlay.classList.add("open");
+document.getElementById("cancelBtn").onclick=closeModal;
+document.getElementById("sendLink").onclick=async()=>{
+const email=document.getElementById("authEmail").value.trim();
+if(!email)return;
+const {error}=await sb.auth.signInWithOtp({email,options:{emailRedirectTo:"https://finstack-jobs.netlify.app"}});
+document.getElementById("authMsg").innerHTML=error
+?`<div class="mnote" style="color:var(--danger)">${esc(error.message)}</div>`
+:`<div class="mok">✨ Link sent! Check your inbox (and spam) — it signs you straight in.</div>`;
+};
+}
+
+function openCard(){
+const p=PROFILE||{};
+mbox.innerHTML=`<h2>TRAINER CARD</h2>
+<label>Trainer name</label><input type="text" id="tcName" value="${esc(p.trainer_name||"")}" placeholder="e.g. Max">
+<label>Title</label><input type="text" id="tcTitle" value="${esc(p.title||"")}" placeholder="e.g. Senior CSM">
+<label>Industry</label><input type="text" id="tcInd" value="${esc(p.industry||"")}" placeholder="e.g. FP&A / fintech SaaS">
+<label>Years of experience</label><input type="number" id="tcYears" min="0" max="50" value="${p.years_exp??""}">
+<label>Choose your trainer</label>
+<div class="sprites" id="tcAvatars">${AVATARS.map(n=>`<img src="${TSPR(n)}" data-av="${n}" class="${p.avatar===n?"on":""}" title="${n}">`).join("")}</div>
+<label>Partner Pokémon</label>
+<div class="sprites" id="tcSprites">${PARTNERS.map(id=>`<img src="${SPR(id)}" data-id="${id}" class="${(p.partner_sprite||25)===id?"on":""}">`).join("")}</div>
+<label>Resume (PDF/DOC, max 5MB)${p.resume_path?' — <span style="color:var(--hp)">on file ✔</span>':""}</label>
+<input type="file" id="tcResume" accept=".pdf,.doc,.docx">
+<label>Gym badges</label>
+<div class="gbadges">
+<div class="gbadge ${p.trainer_name&&p.title?"on":""}" title="Identity: name + title">⚡</div>
+<div class="gbadge ${p.industry&&p.years_exp?"on":""}" title="Experience: industry + years">★</div>
+<div class="gbadge ${p.resume_path?"on":""}" title="Resume uploaded">📄</div>
+</div>
+<div class="mrow"><button class="mbtn" id="tcSave">SAVE</button>
+<button class="mbtn alt" id="tcClose">CLOSE</button>
+<button class="mbtn alt" id="tcOut">SIGN OUT</button></div>
+<div id="tcMsg"></div>`;
+overlay.classList.add("open");
+let chosen=(p.partner_sprite)||25,chosenAv=p.avatar||null;
+document.getElementById("tcSprites").addEventListener("click",e=>{
+const img=e.target.closest("img[data-id]");if(!img)return;
+chosen=+img.dataset.id;
+document.querySelectorAll("#tcSprites img").forEach(i=>i.classList.toggle("on",+i.dataset.id===chosen));
+});
+document.getElementById("tcAvatars").addEventListener("click",e=>{
+const img=e.target.closest("img[data-av]");if(!img)return;
+chosenAv=chosenAv===img.dataset.av?null:img.dataset.av;
+document.querySelectorAll("#tcAvatars img").forEach(i=>i.classList.toggle("on",i.dataset.av===chosenAv));
+});
+document.getElementById("tcClose").onclick=closeModal;
+document.getElementById("tcOut").onclick=async()=>{await sb.auth.signOut();closeModal();};
+document.getElementById("tcSave").onclick=async()=>{
+const msg=document.getElementById("tcMsg");
+msg.innerHTML=`<div class="mnote">Saving…</div>`;
+let resume_path=p.resume_path||null;
+const file=document.getElementById("tcResume").files[0];
+if(file){
+if(file.size>5*1024*1024){msg.innerHTML=`<div class="mnote" style="color:var(--danger)">Resume is over 5MB.</div>`;return;}
+const path=`${USER.id}/${Date.now()}-${file.name.replace(/[^\w.\-]/g,"_")}`;
+const {error:upErr}=await sb.storage.from("resumes").upload(path,file,{upsert:true});
+if(upErr){msg.innerHTML=`<div class="mnote" style="color:var(--danger)">Resume upload failed: ${esc(upErr.message)}</div>`;return;}
+resume_path=path;
+}
+const row={id:USER.id,
+trainer_name:document.getElementById("tcName").value.trim()||null,
+title:document.getElementById("tcTitle").value.trim()||null,
+industry:document.getElementById("tcInd").value.trim()||null,
+years_exp:+document.getElementById("tcYears").value||null,
+partner_sprite:chosen,avatar:chosenAv,resume_path,updated_at:new Date().toISOString()};
+const {error}=await sb.from("profiles").upsert(row);
+if(error){msg.innerHTML=`<div class="mnote" style="color:var(--danger)">${esc(error.message)}</div>`;return;}
+PROFILE=row;renderTrainer();
+msg.innerHTML=`<div class="mok">✨ Trainer card saved!</div>`;
+};
+}
+
+async function loadTrainer(){
+if(!sb||!USER)return;
+const {data:p}=await sb.from("profiles").select("*").eq("id",USER.id).maybeSingle();
+PROFILE=p||null;
+const {data:f}=await sb.from("favorites").select("*").eq("user_id",USER.id);
+FAVS.clear();
+(f||[]).forEach(r=>FAVS.set(r.url,{url:r.url,title:r.title,co:r.company,loc:r.loc}));
+renderTrainer();render();
+}
+
+async function toggleFav(d){
+if(!USER){openLogin();return;}
+if(FAVS.has(d.url)){
+FAVS.delete(d.url);renderTrainer();render();
+await sb.from("favorites").delete().match({user_id:USER.id,job_key:d.url});
+}else{
+FAVS.set(d.url,{url:d.url,title:d.title,co:d.co,loc:d.loc});renderTrainer();render();
+await sb.from("favorites").insert({user_id:USER.id,job_key:d.url,title:d.title,company:d.co,url:d.url,loc:d.loc});
+}
+}
+document.getElementById("list").addEventListener("click",e=>{
+const pb=e.target.closest(".pball");if(!pb)return;
+e.preventDefault();e.stopPropagation();
+toggleFav({url:pb.dataset.url,title:pb.dataset.title,co:pb.dataset.co,loc:pb.dataset.loc});
+});
+
+/* one signup = trainer account + newsletter list (Netlify form, deduped per user) */
+async function autoSubscribe(){
+try{
+const k="nl-"+USER.id;
+if(localStorage.getItem(k))return;
+await fetch("/",{method:"POST",
+headers:{"Content-Type":"application/x-www-form-urlencoded"},
+body:new URLSearchParams({"form-name":"subscribe",email:USER.email,interest:"both"}).toString()});
+localStorage.setItem(k,"1");
+}catch(e){}
+}
+if(sb){
+sb.auth.onAuthStateChange((_ev,session)=>{
+USER=session?session.user:null;
+if(USER){loadTrainer();autoSubscribe();}
+else {PROFILE=null;FAVS.clear();S.party=false;const pt=document.getElementById("partyTab");if(pt)pt.classList.remove("on");renderTrainer();render();}
+});
+}
+document.getElementById("joinBtn").onclick=()=>{USER?openCard():openLogin();};
+
+/* sprite injection */
+document.querySelectorAll("img[data-poke]").forEach(i=>i.src=SPR(i.dataset.poke));
+document.getElementById("heroSprites").innerHTML=HERO.map(id=>`<img class="spr" src="${SPR(id)}" alt="">`).join("");
+document.getElementById("footSprites").innerHTML=FOOT.map(id=>`<img class="spr" src="${SPR(id)}" alt="">`).join("");
+
+renderTrainer();
+renderSide();
+loadAll();
+</script>
+</body>
+</html>

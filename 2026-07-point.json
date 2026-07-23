@@ -1,0 +1,10 @@
+{
+ "month": "2026-07",
+ "date": "2026-07-22",
+ "note": "Baseline snapshot (point-level). 76 of 116 company feeds live; companies with disabled public ATS APIs (Deel, Groq, Snyk, Rippling, Mistral, EvenUp, 11x, Cyera etc.) show status err and are excluded from counts.",
+ "total": 6862,
+ "gtm": 2490,
+ "eng": 2668,
+ "bySec": {"fin": 2468, "labs": 1446, "agents": 940, "inference": 636, "devtools": 449, "hrtech": 412, "cyber": 309, "healthai": 202},
+ "byCo": {"Drivetrain":34,"Pigment":100,"Abacum":20,"Runway (FP&A)":4,"Aleph":7,"Cube":30,"Anaplan":186,"Brex":270,"Navan":197,"Extend":18,"Payhawk":54,"Ramp":120,"Stripe":529,"Expensify":1,"Rho":39,"Pleo":46,"Tabs":38,"Orb":26,"Zuora":39,"Rillet":23,"Sequence":20,"Campfire":31,"DualEntry":47,"Numeric":13,"Light":15,"FloQast":40,"Melio":15,"Fazeshift":2,"Zip":134,"Mercury":55,"Highbeam":8,"Meow":5,"Pilot":7,"Fieldguide":36,"Carta":65,"Juniper Square":46,"Juno (Tax AI)":3,"Addepar":121,"Together AI":59,"Fireworks AI":38,"Basis":2,"AngelList":22,"CoreWeave":285,"Baseten":67,"Modal":32,"Vercel":80,"Cognition":76,"Lambda":43,"Gusto":78,"Linear":24,"Remote":212,"Lattice":7,"Justworks":98,"Cursor":120,"Cerebras":112,"Oyster":17,"Supabase":55,"Cresta":99,"Replit":94,"Abnormal":70,"Chainguard":76,"Decagon":119,"Vanta":104,"Sierra":165,"Anthropic":414,"Drata":59,"xAI":219,"Perplexity":80,"Hippocratic AI":63,"Abridge":43,"Ambience":21,"Harvey":348,"OpenEvidence":11,"ElevenLabs":209,"Commure":64,"OpenAI":733}
+}
